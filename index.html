@@ -1,5 +1,4 @@
-
-html_content = '''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -740,4 +739,257 @@ html_content = '''<!DOCTYPE html>
             </div>
         </div>
 
-        <div class="search
+        <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="search-input" id="searchInput" placeholder="Search topics...">
+        </div>
+
+        <div class="topic-grid" id="topicGrid">
+            <!-- Topics will be populated by JavaScript -->
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+                <h2 id="modalTitle"></h2>
+                <p id="modalChapterCode"></p>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>About NABH</h4>
+                <p>National Accreditation Board for Hospitals & Healthcare Providers (NABH) standards ensure quality healthcare delivery.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <p><a href="#"> Standards Overview</a></p>
+                <p><a href="#">Certification Process</a></p>
+                <p><a href="#">Contact Support</a></p>
+            </div>
+            <div class="footer-section">
+                <h4>Resources</h4>
+                <p><a href="#">Training Materials</a></p>
+                <p><a href="#">Documentation</a></p>
+                <p><a href="#">Assessment Tools</a></p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 NABH Training Portal. All rights reserved. | <a href="#">Privacy Policy</a></p>
+        </div>
+    </footer>
+
+    <script>
+        const topics = [
+            {
+                id: 1,
+                title: "Resource Management",
+                code: "NRM-001",
+                category: "nrm",
+                icon: "fa-users-cog",
+                keyPoints: [
+                    "Human resource planning and management",
+                    "Staff competency assessment",
+                    "Training and development programs",
+                    "Performance evaluation systems"
+                ],
+                details: "Comprehensive resource management ensures optimal utilization of nursing staff and development of competencies."
+            },
+            {
+                id: 2,
+                title: "Nursing Practice",
+                code: "PNP-002",
+                category: "pnp",
+                icon: "fa-user-nurse",
+                keyPoints: [
+                    "Patient care protocols",
+                    "Clinical best practices",
+                    "Infection prevention measures",
+                    "Documentation standards"
+                ],
+                details: "Nursing practice standards ensure safe, quality, and compassionate patient care delivery."
+            },
+            {
+                id: 3,
+                title: "Medication Management",
+                code: "MOM-003",
+                category: "mom",
+                icon: "fa-pills",
+                keyPoints: [
+                    "Medication procurement and storage",
+                    "Safe dispensing practices",
+                    "Adverse drug event reporting",
+                    "Patient medication education"
+                ],
+                details: "Medication management systems prevent errors and ensure safe medication administration."
+            },
+            {
+                id: 4,
+                title: "Education and Competency",
+                code: "ECG-004",
+                category: "ecg",
+                icon: "fa-graduation-cap",
+                keyPoints: [
+                    "Competency assessment frameworks",
+                    "Continuous education programs",
+                    "Skills validation",
+                    "Career development pathways"
+                ],
+                details: "Education programs ensure nursing staff maintains and enhances their clinical competencies."
+            },
+            {
+                id: 5,
+                title: "Infection Prevention & Control",
+                code: "IPC-005",
+                category: "ipc",
+                icon: "fa-shield-virus",
+                keyPoints: [
+                    "Standard precautions implementation",
+                    "Hand hygiene protocols",
+                    "Sterilization and disinfection",
+                    "Outbreak management"
+                ],
+                details: "Infection prevention protocols protect patients, staff, and visitors from healthcare-associated infections."
+            },
+            {
+                id: 6,
+                title: "Governance and Ethics",
+                code: "GEL-006",
+                category: "gel",
+                icon: "fa-sitemap",
+                keyPoints: [
+                    "Ethical decision-making",
+                    "Professional accountability",
+                    "Regulatory compliance",
+                    "Grievance handling"
+                ],
+                details: "Governance frameworks ensure ethical practice and organizational accountability."
+            },
+            {
+                id: 7,
+                title: "Continuous Quality Improvement",
+                code: "CNQI-007",
+                category: "cnqi",
+                icon: "fa-chart-line",
+                keyPoints: [
+                    "Quality metrics and monitoring",
+                    "Root cause analysis",
+                    "Process improvement initiatives",
+                    "Data-driven decision making"
+                ],
+                details: "Quality improvement methodologies drive continuous enhancement in healthcare delivery."
+            }
+        ];
+
+        let completedTopics = new Set();
+
+        function renderTopics(topicsToShow = topics) {
+            const topicGrid = document.getElementById("topicGrid");
+            topicGrid.innerHTML = topicsToShow.map(topic => `
+                <div class="topic-card ${completedTopics.has(topic.id) ? 'completed' : ''}" onclick="openModal(${topic.id})">
+                    <div class="topic-card-header">
+                        <div class="topic-icon"><i class="fas ${topic.icon}"></i></div>
+                        <div class="topic-title-group">
+                            <h3>${topic.title}</h3>
+                            <span class="chapter-code">${topic.code}</span>
+                        </div>
+                        <div class="completion-check ${completedTopics.has(topic.id) ? 'checked' : ''}" onclick="event.stopPropagation(); toggleCompletion(${topic.id})">
+                            ${completedTopics.has(topic.id) ? '<i class="fas fa-check"></i>' : ''}
+                        </div>
+                    </div>
+                    <div class="topic-body">
+                        <div class="key-points">
+                            <h4><i class="fas fa-lightbulb"></i> Key Points</h4>
+                            <ul>
+                                ${topic.keyPoints.map(point => `<li>${point}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            updateProgress();
+        }
+
+        function openModal(topicId) {
+            const topic = topics.find(t => t.id === topicId);
+            if (topic) {
+                document.getElementById("modalTitle").textContent = topic.title;
+                document.getElementById("modalChapterCode").textContent = topic.code;
+                document.getElementById("modalBody").innerHTML = `
+                    <div class="detail-section">
+                        <h3><i class="fas fa-${topic.icon}"></i> Overview</h3>
+                        <p>${topic.details}</p>
+                    </div>
+                    <div class="detail-section">
+                        <h3><i class="fas fa-list"></i> Key Points</h3>
+                        <ul>
+                            ${topic.keyPoints.map(point => `<li>${point}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div class="detail-section">
+                        <h3><i class="fas fa-book"></i> Resources</h3>
+                        <div class="resources">
+                            <a href="#" class="resource-link video"><i class="fas fa-video"></i> Video Tutorial</a>
+                            <a href="#" class="resource-link reading"><i class="fas fa-file-pdf"></i> PDF Guide</a>
+                        </div>
+                    </div>
+                `;
+                document.getElementById("modalOverlay").classList.add("active");
+            }
+        }
+
+        function closeModal() {
+            document.getElementById("modalOverlay").classList.remove("active");
+        }
+
+        function toggleCompletion(topicId) {
+            if (completedTopics.has(topicId)) {
+                completedTopics.delete(topicId);
+            } else {
+                completedTopics.add(topicId);
+            }
+            renderTopics();
+        }
+
+        function updateProgress() {
+            const completed = completedTopics.size;
+            const total = topics.length;
+            const percentage = Math.round((completed / total) * 100);
+            document.getElementById("progressFill").style.width = percentage + "%";
+            document.getElementById("progressText").textContent = `${percentage}% Completed (${completed}/${total} Topics)`;
+        }
+
+        document.getElementById("searchInput").addEventListener("input", (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filtered = topics.filter(topic =>
+                topic.title.toLowerCase().includes(searchTerm) ||
+                topic.code.toLowerCase().includes(searchTerm)
+            );
+            renderTopics(filtered);
+        });
+
+        document.querySelectorAll(".nav-item").forEach(item => {
+            item.addEventListener("click", () => {
+                document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
+                item.classList.add("active");
+                const filter = item.dataset.filter;
+                const filtered = filter === "all" ? topics : topics.filter(t => t.category === filter);
+                renderTopics(filtered);
+            });
+        });
+
+        document.getElementById("modalOverlay").addEventListener("click", (e) => {
+            if (e.target === document.getElementById("modalOverlay")) {
+                closeModal();
+            }
+        });
+
+        renderTopics();
+    </script>
+</body>
+</html>
